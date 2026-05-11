@@ -83,8 +83,7 @@ Items verifiable from a local checkout are ticked below. Items that require a re
 
 ## Next manual steps for the project owner
 
-1. Configure repository secrets: PyPI Trusted Publisher (no token), confirm `GITHUB_TOKEN` has `packages: write` for GHCR.
-2. Push a `v0.1.0-rc1` tag to dry-run `release.yml` against TestPyPI before flipping to real PyPI.
-3. Enable GitHub Pages (Settings → Pages → Source: GitHub Actions).
-4. Set branch protection on `main` requiring `Tests` checks.
-5. Run `docker compose up` against `docker-compose.example.yml` for the end-to-end smoke (manual checks marked **[deferred]** above).
+1. **Releases are manual** (release/docs workflows intentionally removed). Follow the runbook in [`manual-release.md`](manual-release.md) when you're ready to publish v0.1.0: build the four binaries, generate `SHA256SUMS`, create the GitHub Release, upload the wheel to PyPI (try TestPyPI first), push the Docker image to GHCR, and `mkdocs gh-deploy` the docs.
+2. Set branch protection on `main` requiring the `Tests` checks (test.yml).
+3. Run `docker compose up` against `docker-compose.example.yml` for the end-to-end smoke (the manual items marked **[deferred]** above).
+4. When you want full automation, re-add `release.yml` and `docs.yml` from any pre-removal commit and configure repository secrets / Trusted Publisher first.

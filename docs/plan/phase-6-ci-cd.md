@@ -6,6 +6,10 @@
 
 Three GitHub Actions workflows: tests on every push/PR, docs deploy on push to main, release on tag push. The release workflow builds four binaries with `SHA256SUMS`, publishes a wheel to PyPI, pushes a Docker image to GHCR, and creates a GitHub Release with all artifacts.
 
+## Current state
+
+Only `test.yml` ships. `release.yml` and `docs.yml` were **intentionally removed** so external side effects (PyPI uploads, GHCR pushes, Pages deploys) remain under manual control until the project owner is ready to automate. See [`manual-release.md`](manual-release.md) for the runbook that replicates the workflows by hand. When ready, re-add the YAML files from a pre-removal commit or from `/CLAUDE.md` Step 23 and configure the necessary repository secrets first.
+
 ## Prerequisites
 
 - Phases 1–5 complete (you have things to test, lint, and release).

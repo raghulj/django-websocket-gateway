@@ -83,9 +83,9 @@ This folder is the working plan for delivering v1 of `django-websocket-gateway` 
 - [x] 5.13 `docs/docs/threat-model.md`
 
 ### Phase 6 — CI/CD → [phase-6-ci-cd.md](phase-6-ci-cd.md)
-- [x] 6.1 `.github/workflows/test.yml`
-- [x] 6.2 `.github/workflows/release.yml`
-- [x] 6.3 `.github/workflows/docs.yml`
+- [x] 6.1 `.github/workflows/test.yml` — runs lint + tests on every push/PR (free, public-repo Actions)
+- [ ] 6.2 `.github/workflows/release.yml` — **deferred to manual.** PyPI publish + GHCR Docker push triggers external billing and visibility; the project owner will run these steps by hand. See [`manual-release.md`](manual-release.md).
+- [ ] 6.3 `.github/workflows/docs.yml` — **deferred to manual.** GitHub Pages deploy gated by repo-level Pages setup; run `mkdocs gh-deploy` locally when ready.
 
 ### Phase 7 — Acceptance → [phase-7-acceptance.md](phase-7-acceptance.md)
 - [x] 7.1 Walk the Testing checklist (suite-level items verified locally; release-dependent items deferred for manual smoke after first GitHub release)
