@@ -38,25 +38,24 @@ from .auth_decorator import require_internal_auth
 def ws_auth(request: Any) -> JsonResponse:
     """Authenticate a WebSocket handshake on behalf of the gateway.
 
-    Request:
-        Method: ``POST``
-        Headers:
-            * ``X-Internal-Auth``: the configured ``INTERNAL_SECRET``.
-            * ``X-Forwarded-Session``: the value of the user's ``sessionid``
-              cookie, forwarded by the gateway.
+    The view expects a POST with two headers:
+
+    - ``X-Internal-Auth``: the configured ``INTERNAL_SECRET``.
+    - ``X-Forwarded-Session``: the user's ``sessionid`` cookie, forwarded
+      by the gateway.
 
     Returns:
-        * ``200`` + ``{"authenticated": true, "user_id": int, "username": str,
-          "allowed_channels": list[str]}`` for a valid, active user.
-        * ``401`` + ``{"authenticated": false}`` for missing/invalid session
-          or an inactive user.
-        * ``403`` (via :func:`require_internal_auth`) when the
-          ``X-Internal-Auth`` header is missing or wrong.
+        On success, HTTP 200 with a JSON body of the form
+        ``{"authenticated": true, "user_id": int, "username": str,
+        "allowed_channels": list[str]}``. On a missing or invalid session,
+        or an inactive user, HTTP 401 with ``{"authenticated": false}``.
+        Requests without (or with a wrong) ``X-Internal-Auth`` header
+        receive HTTP 403 from :func:`require_internal_auth`.
 
     Raises:
         TypeError: When ``AUTHORIZATION_CALLBACK`` returns a value that is
-            not ``list[str]``. This indicates a programmer error in user code
-            and is intentionally surfaced as HTTP 500 to make it loud.
+            not ``list[str]``. This indicates a programmer error in user
+            code and is intentionally surfaced as HTTP 500 to make it loud.
     """
     session_key = request.headers.get("X-Forwarded-Session", "")
     if not session_key:

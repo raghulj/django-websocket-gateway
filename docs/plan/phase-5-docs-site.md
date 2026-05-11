@@ -14,12 +14,12 @@ Build the MkDocs Material site under `docs/`. **The API reference pages are gene
 ## Tasks
 
 ### 5.1 `docs/mkdocs.yml` + `docs/requirements.txt`
-- [ ] `docs/requirements.txt`:
+- [x] `docs/requirements.txt`:
   - `mkdocs`
   - `mkdocs-material`
   - `mkdocstrings[python]`
   - `pymdown-extensions`
-- [ ] `docs/mkdocs.yml`:
+- [x] `docs/mkdocs.yml`:
   - `site_name: django-websocket-gateway`
   - `docs_dir: docs` (so `docs/docs/*.md` are the source files).
   - `theme: name: material`, with `features: [navigation.sections, navigation.expand, content.code.copy, content.code.annotate]`.
@@ -54,22 +54,22 @@ Nav order:
 
 Each lives at `docs/docs/<name>.md`. Write from real behaviour — read the source before writing the page. Keep examples copy-pasteable; CI does **not** execute them but reviewers will.
 
-- [ ] **`index.md`** — one-paragraph elevator pitch, the architecture diagram from `README.md`, link to Quickstart.
-- [ ] **`quickstart.md`** — five-minute install→running guide. Expand the `README.md` quickstart with screenshots/notes. Include `git config core.hooksPath .githooks` for contributors.
-- [ ] **`architecture.md`** — components, data flow, decisions (why Go for the gateway, why Redis pub/sub, why no presence). 200–300 lines.
-- [ ] **`authentication.md`** — dedicated secret, validation rules at startup, threat coverage (link to threat-model.md), rotation guidance (v1: change settings + restart both processes).
-- [ ] **`channels.md`** — naming rules, `_` reserved for control channels, the authorization callback contract, common patterns (`user-{id}`, `org-{id}`, `room-{slug}`). End with `:::: mkdocstrings` for `channels_for_user` example signature.
-- [ ] **`publishing.md`** — `publish()` from views, signals, Celery; payload JSON contract; "no subscribers → no error" semantics. Embed the `publish` docstring with `::: websocket_gateway.publish.publish`.
-- [ ] **`background-jobs.md`** — Celery example, broker-vs-pubsub DB separation.
-- [ ] **`logout.md`** — the `user_logged_out` signal pipeline, `force_logout_user`, behaviour matrix (logout vs ban vs session expiry). Embed `::: websocket_gateway.revocation.force_logout_user`.
-- [ ] **`javascript-client.md`** — `WSClient` API reference. Hand-written because mkdocstrings doesn't render JS; copy the documented surface from `client.js` JSDoc.
-- [ ] **`deployment.md`** — Docker Compose walkthrough, Caddy config, GHCR image option, scaling notes.
-- [ ] **`configuration.md`** — exhaustive reference of every `WEBSOCKET_GATEWAY` settings key and every env var the gateway reads. Generated partly from the `_config` docstring (`::: websocket_gateway._config`) but the env-var table is hand-maintained.
-- [ ] **`threat-model.md`** — STRIDE-style table.
+- [x] **`index.md`** — one-paragraph elevator pitch, the architecture diagram from `README.md`, link to Quickstart.
+- [x] **`quickstart.md`** — five-minute install→running guide. Expand the `README.md` quickstart with screenshots/notes. Include `git config core.hooksPath .githooks` for contributors.
+- [x] **`architecture.md`** — components, data flow, decisions (why Go for the gateway, why Redis pub/sub, why no presence). 200–300 lines.
+- [x] **`authentication.md`** — dedicated secret, validation rules at startup, threat coverage (link to threat-model.md), rotation guidance (v1: change settings + restart both processes).
+- [x] **`channels.md`** — naming rules, `_` reserved for control channels, the authorization callback contract, common patterns (`user-{id}`, `org-{id}`, `room-{slug}`). End with `:::: mkdocstrings` for `channels_for_user` example signature.
+- [x] **`publishing.md`** — `publish()` from views, signals, Celery; payload JSON contract; "no subscribers → no error" semantics. Embed the `publish` docstring with `::: websocket_gateway.publish.publish`.
+- [x] **`background-jobs.md`** — Celery example, broker-vs-pubsub DB separation.
+- [x] **`logout.md`** — the `user_logged_out` signal pipeline, `force_logout_user`, behaviour matrix (logout vs ban vs session expiry). Embed `::: websocket_gateway.revocation.force_logout_user`.
+- [x] **`javascript-client.md`** — `WSClient` API reference. Hand-written because mkdocstrings doesn't render JS; copy the documented surface from `client.js` JSDoc.
+- [x] **`deployment.md`** — Docker Compose walkthrough, Caddy config, GHCR image option, scaling notes.
+- [x] **`configuration.md`** — exhaustive reference of every `WEBSOCKET_GATEWAY` settings key and every env var the gateway reads. Generated partly from the `_config` docstring (`::: websocket_gateway._config`) but the env-var table is hand-maintained.
+- [x] **`threat-model.md`** — STRIDE-style table.
 
 ### 5.3 Auto-generated reference pages
 
-- [ ] **`reference/python.md`** — thin per-module stubs that delegate to mkdocstrings:
+- [x] **`reference/python.md`** — thin per-module stubs that delegate to mkdocstrings:
   ```
   # Python API reference
 
@@ -94,14 +94,14 @@ Each lives at `docs/docs/<name>.md`. Write from real behaviour — read the sour
   ```
   Internal modules (`_downloader`, `_config`) are intentionally rendered because they describe configuration; private helpers within them are filtered by mkdocstrings defaults (members starting with `_` are hidden unless explicitly listed).
 
-- [ ] **`reference/go.md`** — generated at build time. Add a `docs/scripts/render-godoc.sh` that runs `go doc -all ./gateway/... | pandoc -f plain -t gfm > docs/docs/reference/go.md.tmp` then prepends a header. Wire it into a `Makefile` target `make docs-godoc` and call it from CI before `mkdocs build`. **The committed `reference/go.md` is the generated artefact** so contributors can preview without running the script; CI regenerates and fails if the diff is non-empty (regression guard against stale docs).
+- [x] **`reference/go.md`** — generated at build time. Add a `docs/scripts/render-godoc.sh` that runs `go doc -all ./gateway/... | pandoc -f plain -t gfm > docs/docs/reference/go.md.tmp` then prepends a header. Wire it into a `Makefile` target `make docs-godoc` and call it from CI before `mkdocs build`. **The committed `reference/go.md` is the generated artefact** so contributors can preview without running the script; CI regenerates and fails if the diff is non-empty (regression guard against stale docs).
 
   Acceptance: changing a godoc comment, running `make docs-godoc`, committing the regenerated page is the standard workflow. CI catches drift.
 
 ### 5.4 Doc-style audit
-- [ ] `python -c "import pydocstyle; pydocstyle('websocket_gateway/')"` — or `ruff check --select D websocket_gateway/` once we add the `D` ruleset for the docs pass. (Optional: add ruff `D` rules to `pyproject.toml` after Phase 1 lands.)
-- [ ] Spot-check rendered API pages with `mkdocs serve`: open `/reference/python/` and confirm every public symbol has a usable description.
-- [ ] No "TODO", "FIXME", or "see source" in any docstring. If you couldn't describe it, the API isn't ready.
+- [x] `python -c "import pydocstyle; pydocstyle('websocket_gateway/')"` — or `ruff check --select D websocket_gateway/` once we add the `D` ruleset for the docs pass. (Optional: add ruff `D` rules to `pyproject.toml` after Phase 1 lands.)
+- [x] Spot-check rendered API pages with `mkdocs serve`: open `/reference/python/` and confirm every public symbol has a usable description.
+- [x] No "TODO", "FIXME", or "see source" in any docstring. If you couldn't describe it, the API isn't ready.
 
 ## Definition of done for Phase 5
 

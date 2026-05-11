@@ -68,19 +68,19 @@ This folder is the working plan for delivering v1 of `django-websocket-gateway` 
 - [x] 4.4 `.env.example`
 
 ### Phase 5 — MkDocs site → [phase-5-docs-site.md](phase-5-docs-site.md)
-- [ ] 5.1 `docs/mkdocs.yml` + `docs/requirements.txt`
-- [ ] 5.2 `docs/docs/index.md`
-- [ ] 5.3 `docs/docs/quickstart.md`
-- [ ] 5.4 `docs/docs/architecture.md`
-- [ ] 5.5 `docs/docs/authentication.md`
-- [ ] 5.6 `docs/docs/channels.md`
-- [ ] 5.7 `docs/docs/publishing.md`
-- [ ] 5.8 `docs/docs/background-jobs.md`
-- [ ] 5.9 `docs/docs/logout.md`
-- [ ] 5.10 `docs/docs/javascript-client.md`
-- [ ] 5.11 `docs/docs/deployment.md`
-- [ ] 5.12 `docs/docs/configuration.md`
-- [ ] 5.13 `docs/docs/threat-model.md`
+- [x] 5.1 `docs/mkdocs.yml` + `docs/requirements.txt`
+- [x] 5.2 `docs/docs/index.md`
+- [x] 5.3 `docs/docs/quickstart.md`
+- [x] 5.4 `docs/docs/architecture.md`
+- [x] 5.5 `docs/docs/authentication.md`
+- [x] 5.6 `docs/docs/channels.md`
+- [x] 5.7 `docs/docs/publishing.md`
+- [x] 5.8 `docs/docs/background-jobs.md`
+- [x] 5.9 `docs/docs/logout.md`
+- [x] 5.10 `docs/docs/javascript-client.md`
+- [x] 5.11 `docs/docs/deployment.md`
+- [x] 5.12 `docs/docs/configuration.md`
+- [x] 5.13 `docs/docs/threat-model.md`
 
 ### Phase 6 — CI/CD → [phase-6-ci-cd.md](phase-6-ci-cd.md)
 - [ ] 6.1 `.github/workflows/test.yml`
