@@ -83,9 +83,9 @@ This folder is the working plan for delivering v1 of `django-websocket-gateway` 
 - [x] 5.13 `docs/docs/threat-model.md`
 
 ### Phase 6 — CI/CD → [phase-6-ci-cd.md](phase-6-ci-cd.md)
-- [ ] 6.1 `.github/workflows/test.yml`
-- [ ] 6.2 `.github/workflows/release.yml`
-- [ ] 6.3 `.github/workflows/docs.yml`
+- [x] 6.1 `.github/workflows/test.yml`
+- [x] 6.2 `.github/workflows/release.yml`
+- [x] 6.3 `.github/workflows/docs.yml`
 
 ### Phase 7 — Acceptance → [phase-7-acceptance.md](phase-7-acceptance.md)
 - [ ] 7.1 Walk the Testing checklist in `/CLAUDE.md` against a local stack

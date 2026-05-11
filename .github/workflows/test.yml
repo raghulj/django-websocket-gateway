@@ -1,0 +1,105 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Python ${{ matrix.python }} × Django ${{ matrix.django }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12"]
+        django: ["4.2", "5.0"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install "django==${{ matrix.django }}.*"
+      - name: Lint
+        run: |
+          ruff check .
+          ruff format --check .
+      - name: Test
+        run: pytest -q
+
+  go:
+    name: Go gateway
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+      - name: Format check
+        working-directory: gateway
+        run: |
+          fmt_diff=$(gofmt -s -l .)
+          if [ -n "$fmt_diff" ]; then
+            echo "::error::gofmt -s differences:"
+            echo "$fmt_diff"
+            exit 1
+          fi
+      - name: Vet
+        working-directory: gateway
+        run: go vet ./...
+      - name: Lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: gateway
+      - name: Test
+        working-directory: gateway
+        run: go test -race -cover ./...
+
+  js:
+    name: JS client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Prettier
+        run: npx --yes prettier --check websocket_gateway/static/websocket_gateway/client.js
+      - name: Test
+        run: node --test websocket_gateway/static/websocket_gateway/client.test.js
+
+  docs:
+    name: Docs strict build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install -r docs/requirements.txt
+      - name: Regenerate Go reference
+        run: bash docs/scripts/render-godoc.sh
+      - name: Fail if Go reference drifted
+        run: |
+          if ! git diff --quiet docs/docs/reference/go.md; then
+            echo "::error::docs/docs/reference/go.md is stale. Run docs/scripts/render-godoc.sh and commit."
+            git diff docs/docs/reference/go.md
+            exit 1
+          fi
+      - name: Build
+        run: mkdocs build --strict --config-file docs/mkdocs.yml --site-dir _site
