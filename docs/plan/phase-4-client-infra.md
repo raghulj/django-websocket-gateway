@@ -14,8 +14,8 @@ Ship the small browser client and the reference deployment files (`docker-compos
 ## Tasks
 
 ### 4.1 `static/websocket_gateway/client.js` (Step 21) — `test_client.js`
-- [ ] **Test setup:** use `vitest` (or stdlib `node:test` with `jsdom`) to run `client.js` in a fake browser. Add `vitest`, `jsdom`, `mock-socket` as a `package.json` dev dep under `client-tests/` (a tiny subdir; we do NOT publish an npm package).
-- [ ] **Tests:**
+- [x] **Test setup:** use `vitest` (or stdlib `node:test` with `jsdom`) to run `client.js` in a fake browser. Add `vitest`, `jsdom`, `mock-socket` as a `package.json` dev dep under `client-tests/` (a tiny subdir; we do NOT publish an npm package).
+- [x] **Tests:**
   - `new WSClient(url).subscribe("ch")` after `onopen` → sends one `{action:"subscribe",channel:"ch"}` frame.
   - Subscribing while not yet open → frame is sent on next `onopen`.
   - `unsubscribe("ch")` after open → frame sent; channel removed from set.
@@ -25,27 +25,27 @@ Ship the small browser client and the reference deployment files (`docker-compos
   - `onclose` with code 4401 → no reconnect attempt.
   - `onclose` with code 1006 (network drop) → reconnect with exponential backoff capped at 30s, jittered.
   - `.close()` → no reconnect.
-- [ ] **Implementation:** per Step 21. Single file, ES2022, no build step.
-- [ ] **Lint:** `npx prettier --check client.js`.
+- [x] **Implementation:** per Step 21. Single file, ES2022, no build step.
+- [x] **Lint:** `npx prettier --check client.js`.
 
 ### 4.2 `docker-compose.example.yml`
-- [ ] Services: `django` (placeholder image, build context note in comments), `gateway` (uses GHCR image), `redis:7`, `caddy:2`.
-- [ ] Env vars sourced from `.env`.
-- [ ] Volumes: a named volume for Caddy data.
-- [ ] Container `ulimits` for the gateway: `nofile: 65535`.
-- [ ] Healthchecks: gateway uses `/healthz`; redis uses `redis-cli ping`.
-- [ ] **Comment** at the top: "This is a reference. Replace the `django` image with your app."
+- [x] Services: `django` (placeholder image, build context note in comments), `gateway` (uses GHCR image), `redis:7`, `caddy:2`.
+- [x] Env vars sourced from `.env`.
+- [x] Volumes: a named volume for Caddy data.
+- [x] Container `ulimits` for the gateway: `nofile: 65535`.
+- [x] Healthchecks: gateway uses `/healthz`; redis uses `redis-cli ping`.
+- [x] **Comment** at the top: "This is a reference. Replace the `django` image with your app."
 
 ### 4.3 `Caddyfile.example`
-- [ ] Reverse-proxy `/` to `django:8000`, `/ws/*` to `gateway:8080`.
-- [ ] **Explicitly `respond /internal/* 404` before the django proxy.** This is the public-blocking rule from the Testing checklist.
-- [ ] `tls` block parameterized via env / `{$DOMAIN}`.
-- [ ] WebSocket headers handled (Caddy 2 does this by default for `reverse_proxy`, but comment confirms it).
+- [x] Reverse-proxy `/` to `django:8000`, `/ws/*` to `gateway:8080`.
+- [x] **Explicitly `respond /internal/* 404` before the django proxy.** This is the public-blocking rule from the Testing checklist.
+- [x] `tls` block parameterized via env / `{$DOMAIN}`.
+- [x] WebSocket headers handled (Caddy 2 does this by default for `reverse_proxy`, but comment confirms it).
 
 ### 4.4 `.env.example`
-- [ ] Document every variable used by the compose stack, with a comment per line.
-- [ ] **Never** a real-looking secret value. Use `CHANGEME_GENERATE_WITH_python_-c_secrets_token_urlsafe_48` so it's obviously a placeholder.
-- [ ] List: `WS_INTERNAL_SECRET`, `REDIS_URL`, `DJANGO_AUTH_URL`, `ALLOWED_ORIGINS`, `DOMAIN`, `DJANGO_SECRET_KEY`.
+- [x] Document every variable used by the compose stack, with a comment per line.
+- [x] **Never** a real-looking secret value. Use `CHANGEME_GENERATE_WITH_python_-c_secrets_token_urlsafe_48` so it's obviously a placeholder.
+- [x] List: `WS_INTERNAL_SECRET`, `REDIS_URL`, `DJANGO_AUTH_URL`, `ALLOWED_ORIGINS`, `DOMAIN`, `DJANGO_SECRET_KEY`.
 
 ## Definition of done for Phase 4
 

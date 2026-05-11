@@ -62,10 +62,10 @@ This folder is the working plan for delivering v1 of `django-websocket-gateway` 
 - [x] 3.3 `test_downloader.py`
 
 ### Phase 4 — JS client + reference infra → [phase-4-client-infra.md](phase-4-client-infra.md)
-- [ ] 4.1 `static/websocket_gateway/client.js` (Step 21)
-- [ ] 4.2 `docker-compose.example.yml`
-- [ ] 4.3 `Caddyfile.example` (blocks `/internal/*`)
-- [ ] 4.4 `.env.example`
+- [x] 4.1 `static/websocket_gateway/client.js` (Step 21)
+- [x] 4.2 `docker-compose.example.yml`
+- [x] 4.3 `Caddyfile.example` (blocks `/internal/*`)
+- [x] 4.4 `.env.example`
 
 ### Phase 5 — MkDocs site → [phase-5-docs-site.md](phase-5-docs-site.md)
 - [ ] 5.1 `docs/mkdocs.yml` + `docs/requirements.txt`

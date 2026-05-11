@@ -1,0 +1,24 @@
+# Reference Caddyfile for django-websocket-gateway.
+#
+# Three responsibilities:
+#   1. Terminate TLS for the public domain.
+#   2. Reverse-proxy WebSocket traffic on /ws/* to the Go gateway.
+#   3. Reverse-proxy everything else to Django.
+#   4. Hard-block public traffic to /internal/* (the Django-side auth
+#      endpoint is private; only the gateway, on the internal network,
+#      should ever reach it).
+
+{$DOMAIN} {
+	# Block public access to internal endpoints before any other handler.
+	# The gateway calls Django directly on the internal network, not via
+	# Caddy, so there is no legitimate public traffic on /internal/*.
+	@internal path /internal/*
+	respond @internal 404
+
+	# WebSocket upgrade path.
+	@websocket path /ws/*
+	reverse_proxy @websocket gateway:8080
+
+	# Default: everything else goes to Django.
+	reverse_proxy django:8000
+}

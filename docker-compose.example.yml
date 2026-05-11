@@ -1,0 +1,74 @@
+# Reference docker-compose for django-websocket-gateway.
+#
+# Replace the `django` service with the image of your Django application.
+# Variables come from .env (see .env.example).
+
+services:
+  django:
+    # Example only — replace with your project's image and command.
+    image: your-app:latest
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      WS_INTERNAL_SECRET: ${WS_INTERNAL_SECRET}
+      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: ${DATABASE_URL:-sqlite:///db.sqlite3}
+    depends_on:
+      redis:
+        condition: service_healthy
+    expose:
+      - "8000"
+
+  gateway:
+    image: ghcr.io/raghulj/django-websocket-gateway:latest
+    environment:
+      INTERNAL_AUTH_SECRET: ${WS_INTERNAL_SECRET}
+      REDIS_URL: redis://redis:6379/0
+      DJANGO_AUTH_URL: http://django:8000/internal/ws-auth/
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      LISTEN_ADDR: ":8080"
+      LOG_LEVEL: info
+    depends_on:
+      django:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    expose:
+      - "8080"
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:8080/healthz"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+
+  caddy:
+    image: caddy:2-alpine
+    depends_on:
+      gateway:
+        condition: service_healthy
+      django:
+        condition: service_started
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile.example:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      DOMAIN: ${DOMAIN}
+
+volumes:
+  caddy_data:
+  caddy_config:
