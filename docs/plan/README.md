@@ -57,9 +57,9 @@ This folder is the working plan for delivering v1 of `django-websocket-gateway` 
 - [x] 2.9 Go tests (hub semantics, auth, redis reconnect)
 
 ### Phase 3 — Distribution glue → [phase-3-distribution.md](phase-3-distribution.md)
-- [ ] 3.1 `_downloader.py` (Step 19)
-- [ ] 3.2 `management/commands/runwsgateway.py` (Step 20)
-- [ ] 3.3 `test_downloader.py`
+- [x] 3.1 `_downloader.py` (Step 19)
+- [x] 3.2 `management/commands/runwsgateway.py` (Step 20)
+- [x] 3.3 `test_downloader.py`
 
 ### Phase 4 — JS client + reference infra → [phase-4-client-infra.md](phase-4-client-infra.md)
 - [ ] 4.1 `static/websocket_gateway/client.js` (Step 21)

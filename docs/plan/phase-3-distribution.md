@@ -18,7 +18,7 @@ The downloader has the highest security stakes outside the secret path: a tamper
 ## Tasks
 
 ### 3.1 `websocket_gateway/_downloader.py` (Step 19) — `test_downloader.py`
-- [ ] **Tests** (use `pytest`'s `tmp_path` and a tiny `http.server.ThreadingHTTPServer` fixture):
+- [x] **Tests** (use `pytest`'s `tmp_path` and a tiny `http.server.ThreadingHTTPServer` fixture):
   - **Happy path:** server hosts `SHA256SUMS` + `gateway-linux-amd64`; checksum matches → file lands at `bin/gateway-linux-amd64`, is executable.
   - **Checksum mismatch:** corrupt the binary → `DownloadError`; **no file at destination**; no `.dl-*` temp left behind.
   - **Checksum missing for binary:** `SHA256SUMS` doesn't list our binary name → `DownloadError`.
@@ -30,19 +30,19 @@ The downloader has the highest security stakes outside the secret path: a tamper
   - **Cached binary, executable** → returns it without re-downloading.
   - **Cached binary, not executable** → re-downloads.
   - **Atomic move:** simulate a write failure between download and verify → no partial file at destination.
-- [ ] **Implementation:** per Step 19. Use `tempfile.NamedTemporaryFile(dir=dest.parent)` so `shutil.move` is rename-only.
+- [x] **Implementation:** per Step 19. Use `tempfile.NamedTemporaryFile(dir=dest.parent)` so `shutil.move` is rename-only.
 
 ### 3.2 `management/commands/runwsgateway.py` (Step 20) — `test_runwsgateway.py`
-- [ ] **Tests** (monkeypatch `os.execvpe` to capture args):
+- [x] **Tests** (monkeypatch `os.execvpe` to capture args):
   - Invocation reads config, calls `ensure_binary`, then calls `os.execvpe` with the binary path and a translated env.
   - Env contains `INTERNAL_AUTH_SECRET`, `REDIS_URL`, `DJANGO_AUTH_URL` (default if not in settings), `ALLOWED_ORIGINS` joined by commas, `LISTEN_ADDR` (default `:8080`), `LOG_LEVEL`.
   - Optional keys (`MAX_CONNECTIONS_PER_USER` etc.) are passed through when set.
   - **Secret value not in stdout** — the success message names the binary path and version but not the secret.
-- [ ] **Implementation:** per Step 20. Use `os.execvpe`, not `subprocess.Popen` — common pitfall.
+- [x] **Implementation:** per Step 20. Use `os.execvpe`, not `subprocess.Popen` — common pitfall.
 
 ### 3.3 Final hard-rule audit
-- [ ] Grep `_downloader.py` and `runwsgateway.py`: no `print(...)` of the secret, no exception message containing it.
-- [ ] `ruff check` + `ruff format --check` clean.
+- [x] Grep `_downloader.py` and `runwsgateway.py`: no `print(...)` of the secret, no exception message containing it.
+- [x] `ruff check` + `ruff format --check` clean.
 
 ## Docstring requirement
 
