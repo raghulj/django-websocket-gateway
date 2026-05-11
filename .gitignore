@@ -1,0 +1,117 @@
+# ─── Secrets & env ──────────────────────────────────────────────────────
+# .env.example is the documented template and IS tracked.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+secrets/
+credentials*
+*.crt
+!ca.crt.example
+
+# ─── Python ─────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Test / lint caches
+.tox/
+.nox/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# Virtual envs
+.venv/
+venv/
+env/
+ENV/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# ─── Go ─────────────────────────────────────────────────────────────────
+# Local build outputs
+gateway/gateway
+gateway/dist/
+*.exe
+*.exe~
+*.dll
+*.test
+*.out
+gateway/bin/
+
+# Optional: vendor is checked in by some projects, ignore by default
+gateway/vendor/
+
+# ─── Downloaded gateway binary cache ────────────────────────────────────
+# The Python package downloads the Go binary into websocket_gateway/bin/
+# at runtime; only the .gitkeep should be tracked.
+websocket_gateway/bin/*
+!websocket_gateway/bin/.gitkeep
+
+# ─── MkDocs / docs ──────────────────────────────────────────────────────
+site/
+_site/
+docs/site/
+.cache/
+
+# ─── Editor / OS ────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─── Claude Code ────────────────────────────────────────────────────────
+# Personal/local Claude overrides — never commit.
+.claude/settings.local.json
+.claude/.credentials.json
+.claude/projects/
+.claude/shell-snapshots/
+.claude/todos/
+.claude/statsig/
+.claude/ide/

@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# Pre-commit hook for django-websocket-gateway.
+#
+# Enforces the hard rules in CLAUDE.md against staged content:
+#   1. Secret values never appear in logs, prints, exceptions, responses.
+#   2. Secret comparisons use hmac.compare_digest / crypto/subtle.ConstantTimeCompare,
+#      never `==`.
+#   3. No .env / credentials files are committed.
+#   4. No leftover debug statements (pdb, breakpoint, fmt.Print* in non-test Go).
+#   5. Python is ruff-clean; Go is gofmt-clean and vet-clean.
+#
+# Activate after `git init` with:
+#     git config core.hooksPath .githooks
+#
+# To skip in genuine emergencies (the project rules say don't):
+#     SKIP_PRECOMMIT=1 git commit ...
+set -u
+
+[[ "${SKIP_PRECOMMIT:-}" == "1" ]] && { echo "pre-commit: SKIPPED (SKIP_PRECOMMIT=1)"; exit 0; }
+
+fail=0
+note() { printf '  %s\n' "$*" >&2; }
+section() { printf '\n[pre-commit] %s\n' "$*" >&2; }
+
+staged=()
+while IFS= read -r line; do
+  [[ -n "$line" ]] && staged+=("$line")
+done < <(git diff --cached --name-only --diff-filter=ACM)
+[[ ${#staged[@]} -eq 0 ]] && exit 0
+
+py_files=()
+go_files=()
+for f in "${staged[@]+${staged[@]}}"; do
+  [[ -f "$f" ]] || continue
+  case "$f" in
+    *.py) py_files+=("$f") ;;
+    *.go) go_files+=("$f") ;;
+  esac
+done
+
+# ── 1. Block sensitive files ──────────────────────────────────────────────
+section "checking for sensitive files"
+for f in "${staged[@]+${staged[@]}}"; do
+  case "$f" in
+    .env|.env.*|*.pem|*.key|*credentials*|*secrets/*)
+      # .env.example is the documented template — allow it.
+      [[ "$f" == ".env.example" ]] && continue
+      note "refusing to commit sensitive file: $f"
+      fail=1
+      ;;
+  esac
+done
+
+# ── 2. Secret-leak / comparison rules ────────────────────────────────────
+section "scanning for secret leaks and == on secrets"
+scan_staged() { # file, pattern, message
+  local f="$1" pattern="$2" msg="$3"
+  local hits
+  hits=$(git diff --cached -U0 -- "$f" | grep -nE "^\+[^+]" | grep -E "$pattern" || true)
+  if [[ -n "$hits" ]]; then
+    note "$f: $msg"
+    printf '%s\n' "$hits" | head -3 | sed 's/^/      /' >&2
+    fail=1
+  fi
+}
+
+for f in "${py_files[@]+${py_files[@]}}"; do
+  case "$f" in */docs/*|*/tests/*) continue ;; esac
+  scan_staged "$f" '(logger|logging|log)\.[a-z]+\([^)]*INTERNAL_SECRET' \
+              "secret may be logged (hard rule #3)"
+  scan_staged "$f" '(print|raise [A-Za-z]+)\([^)]*INTERNAL_SECRET' \
+              "secret in print/exception (hard rule #3)"
+  scan_staged "$f" 'INTERNAL_SECRET[[:space:]]*==|==[[:space:]]*[A-Za-z_.]*INTERNAL_SECRET' \
+              "use hmac.compare_digest, not == (hard rule #4)"
+  scan_staged "$f" '(^|[[:space:]])(pdb\.set_trace|breakpoint)\(' \
+              "debug statement (pdb/breakpoint)"
+done
+
+for f in "${go_files[@]+${go_files[@]}}"; do
+  scan_staged "$f" '(slog|log)\.[A-Za-z]+\([^)]*InternalAuthSecret' \
+              "secret may be logged (hard rule #3)"
+  scan_staged "$f" 'InternalAuthSecret[[:space:]]*==|==[[:space:]]*[A-Za-z_.]*InternalAuthSecret' \
+              "use crypto/subtle.ConstantTimeCompare, not == (hard rule #4)"
+  case "$f" in
+    *_test.go) ;;
+    *) scan_staged "$f" 'fmt\.Print(ln|f)?\(' "fmt.Print* in non-test Go (use slog)" ;;
+  esac
+done
+
+# ── 3. Python: ruff format + check on staged files ───────────────────────
+if [[ ${#py_files[@]} -gt 0 ]] && command -v ruff >/dev/null 2>&1; then
+  section "ruff check on ${#py_files[@]} python file(s)"
+  if ! ruff check "${py_files[@]+${py_files[@]}}"; then fail=1; fi
+  if ! ruff format --check "${py_files[@]+${py_files[@]}}"; then
+    note "run: ruff format ${py_files[*]}"
+    fail=1
+  fi
+fi
+
+# ── 4. Go: gofmt + vet ───────────────────────────────────────────────────
+if [[ ${#go_files[@]} -gt 0 ]] && command -v gofmt >/dev/null 2>&1; then
+  section "gofmt -l on ${#go_files[@]} go file(s)"
+  unformatted=$(gofmt -l "${go_files[@]+${go_files[@]}}")
+  if [[ -n "$unformatted" ]]; then
+    note "the following files are not gofmt-clean:"
+    printf '%s\n' "$unformatted" | sed 's/^/      /' >&2
+    note "run: gofmt -w ${go_files[*]}"
+    fail=1
+  fi
+fi
+if [[ ${#go_files[@]} -gt 0 ]] && command -v go >/dev/null 2>&1 && [[ -f gateway/go.mod ]]; then
+  section "go vet ./gateway/..."
+  if ! (cd gateway && go vet ./...); then fail=1; fi
+fi
+
+if (( fail )); then
+  printf '\npre-commit FAILED. Fix the issues above or pass SKIP_PRECOMMIT=1 (discouraged).\n' >&2
+  exit 1
+fi
+
+printf '\npre-commit OK\n' >&2
+exit 0
