@@ -49,6 +49,8 @@ type Config struct {
 	PongTimeout time.Duration
 	// LogLevel sets the slog log level. "debug", "info", "warn", "error".
 	LogLevel slog.Level
+	// AuthTimeout caps each Django auth call. Default 5s.
+	AuthTimeout time.Duration
 }
 
 // ErrShortSecret is returned by Load when INTERNAL_AUTH_SECRET is shorter
@@ -93,6 +95,7 @@ func Load() (*Config, error) {
 		PingInterval:          30 * time.Second,
 		PongTimeout:           60 * time.Second,
 		LogLevel:              slog.LevelInfo,
+		AuthTimeout:           5 * time.Second,
 	}
 
 	for _, kv := range []struct {
@@ -142,6 +145,9 @@ func Load() (*Config, error) {
 		return nil, err
 	}
 	if err := parseDurationInto("PONG_TIMEOUT", &cfg.PongTimeout); err != nil {
+		return nil, err
+	}
+	if err := parseDurationInto("AUTH_TIMEOUT", &cfg.AuthTimeout); err != nil {
 		return nil, err
 	}
 	if err := parseLogLevelInto("LOG_LEVEL", &cfg.LogLevel); err != nil {

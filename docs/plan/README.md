@@ -47,14 +47,14 @@ This folder is the working plan for delivering v1 of `django-websocket-gateway` 
 
 ### Phase 2 — Go gateway → [phase-2-go-gateway.md](phase-2-go-gateway.md)
 - [x] 2.1 `gateway/config.go` (Step 1)
-- [ ] 2.2 `gateway/auth.go` (Step 2)
-- [ ] 2.3 `gateway/redis.go` (Step 5)
-- [ ] 2.4 `gateway/hub.go` (Step 3)
-- [ ] 2.5 `gateway/client.go` (Step 4)
-- [ ] 2.6 `gateway/health.go` (Step 6)
-- [ ] 2.7 `gateway/main.go` (Step 7) — wiring + `wsHandler`
-- [ ] 2.8 `gateway/Dockerfile` (Step 8)
-- [ ] 2.9 Go tests (hub semantics, auth, redis reconnect)
+- [x] 2.2 `gateway/auth.go` (Step 2)
+- [x] 2.3 `gateway/redis.go` (Step 5)
+- [x] 2.4 `gateway/hub.go` (Step 3)
+- [x] 2.5 `gateway/client.go` (Step 4)
+- [x] 2.6 `gateway/health.go` (Step 6)
+- [x] 2.7 `gateway/main.go` (Step 7) — wiring + `wsHandler`
+- [x] 2.8 `gateway/Dockerfile` (Step 8)
+- [x] 2.9 Go tests (hub semantics, auth, redis reconnect)
 
 ### Phase 3 — Distribution glue → [phase-3-distribution.md](phase-3-distribution.md)
 - [ ] 3.1 `_downloader.py` (Step 19)
