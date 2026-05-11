@@ -38,6 +38,71 @@ Precise build instructions for `django-websocket-gateway`. Read `README.md` firs
 9. Downloaded binaries verified against SHA-256 from `SHA256SUMS`. Mismatch is a hard error.
 10. Client-initiated subscriptions to channels starting with `_` are **rejected** by the gateway. The `_` prefix is reserved for internal control channels.
 
+## Development methodology: TDD
+
+This project is **test-driven**. Every implementation task follows red-green-refactor:
+
+1. **Red.** Write a failing test that expresses the next behaviour. Run it; confirm the failure mode is what you expect — an actual assertion failure, not a syntax error or import failure masking it.
+2. **Green.** Write the minimum production code that makes the test pass. No extra features, no speculative branches.
+3. **Refactor.** With tests green, tidy names, extract helpers, remove duplication. Re-run tests after each change.
+
+Rules:
+- **No production code without a failing test that requires it.** If you can't write a test for it, you don't need it.
+- **Commit at green.** One commit per red-green-refactor cycle is ideal — small, reviewable, bisectable.
+- **Tests for the hard rules are non-negotiable.** Every secret-handling code path has a test asserting the secret value does not appear in `str(exc)`, log records, or response bodies (see Step 22).
+- **Prefer integration over mocks where realistic.** Use a real Redis (via `fakeredis` or a test container) for publish/subscribe tests. Don't mock the unit under test.
+- **Tests live next to or under the package.** Go: `*_test.go` next to the file (`hub_test.go` next to `hub.go`). Python: `websocket_gateway/tests/test_*.py`.
+- **Test the contract, not the implementation.** Don't reach into private state when a public-API assertion would do.
+
+The acceptance bar for every phase is: the test suite for that phase is green AND the relevant items in the "Testing checklist" pass when exercised end-to-end.
+
+## Code style and linting
+
+Tooling is locked. CI runs these checks; the pre-commit hook in `.githooks/pre-commit` enforces them locally. Activate the hook once after clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+**Python:**
+- `ruff check` — lint. Enable rule groups `E, W, F, I, UP, B, SIM, RUF`. Line length 100.
+- `ruff format` — format. No black; ruff format is canonical.
+- Type hints on every public function and method. `from __future__ import annotations` at the top of every module.
+- **Docstrings are mandatory on every public module, class, function, and method.** They are the source of truth for the docs site (see "Documentation from code" below). Use Google-style docstrings with `Args:`, `Returns:`, `Raises:`, `Example:` sections where they apply.
+- `pytest` + `pytest-django` for tests. Test settings module at `websocket_gateway/tests/settings.py`.
+
+**Go:**
+- `gofmt -s` — format.
+- `go vet ./...` — vet.
+- `golangci-lint run` — extended lint (errcheck, staticcheck, gosimple, govet, ineffassign, unused).
+- **Every exported identifier carries a complete godoc comment** starting with the identifier name (`// FuncName does X. ...`). Document parameters, return values, error semantics, and goroutine-safety expectations.
+- `log/slog` for logging. **Never** `fmt.Print*` in non-test code (the pre-commit hook will block it).
+- All errors handled or explicitly discarded with `_`.
+
+**JavaScript:**
+- The single `client.js` file: 2-space indent, single quotes, semicolons, ES2022+ syntax.
+- `prettier --check` in CI.
+
+## Documentation from code
+
+**Docstrings and godoc comments are the canonical source for the API reference pages of the MkDocs site.** The site uses `mkdocstrings` (Python handler) to render `websocket_gateway` docstrings into per-module reference pages, and embeds Go API reference produced from `go doc -all ./gateway/...` into a generated page.
+
+Implications for every implementation phase:
+
+- **Every public symbol gets a complete docstring/godoc comment that reads as user-facing documentation.** Assume a third-party developer reads it without ever opening the source file. Cover: purpose, parameters, return value, exceptions/errors, thread-safety, side effects, and at least one worked example for top-level helpers (`publish`, `force_logout_user`, `WSClient`).
+- Internal helpers (leading underscore in Python; lowercase in Go) get a one-line comment naming purpose. They are NOT rendered into the public docs but they ARE read by future maintainers — keep them honest.
+- The MkDocs API reference pages are thin: each page contains one `::: websocket_gateway.<module>` block and a one-paragraph orientation. The substance comes from the docstrings.
+- When you change a function signature or behaviour, update the docstring in the same commit. CI rebuilds the docs on every push to `main`; an outdated docstring will surface as a misleading API reference.
+- Per-module module-level docstring describes the module's responsibility and links (with markdown) to related modules. These appear at the top of each generated reference page.
+- Examples in docstrings must be runnable and copy-pasteable. Where they show a publish or subscribe, the channel names match the conventions in `channels.md`.
+
+**Hygiene rules (enforced or audited):**
+- No commented-out code. Delete it; git remembers.
+- No `TODO` / `FIXME` without a linked issue number.
+- No commits with the pre-commit hook skipped (`SKIP_PRECOMMIT=1`) outside genuine emergencies.
+- No debug statements (`pdb.set_trace`, `breakpoint()`, `fmt.Println` in non-test Go) — the hook blocks these.
+- Secrets never appear in logs, exceptions, response bodies, or test fixtures committed to the repo.
+
 ## Tech stack
 
 **Python:** Python 3.10+, Django 4.2+/5.x, `redis-py`. Stdlib `urllib.request`, `hmac`, `logging`.

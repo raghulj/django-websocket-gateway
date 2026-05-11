@@ -64,12 +64,24 @@ scan_staged() { # file, pattern, message
   fi
 }
 
+# Pattern notes:
+#   The Python and Go secret-leak checks below look for the literal identifier
+#   INTERNAL_SECRET / InternalAuthSecret in interpolation or concatenation
+#   positions. To avoid flagging legitimate references to the config-KEY name
+#   (e.g. raise ImproperlyConfigured("WEBSOCKET_GATEWAY['INTERNAL_SECRET'] is
+#   required.") the regex requires the identifier to NOT be wrapped by quote
+#   characters or square brackets. A line where INTERNAL_SECRET appears only
+#   inside a string literal — naming the documented setting key — is safe.
+
 for f in "${py_files[@]+${py_files[@]}}"; do
   case "$f" in */docs/*|*/tests/*) continue ;; esac
-  scan_staged "$f" '(logger|logging|log)\.[a-z]+\([^)]*INTERNAL_SECRET' \
+  scan_staged "$f" '(logger|logging|log)\.[a-z]+\([^)]*[^"'"'"'[]INTERNAL_SECRET[^]"'"'"']' \
               "secret may be logged (hard rule #3)"
-  scan_staged "$f" '(print|raise [A-Za-z]+)\([^)]*INTERNAL_SECRET' \
+  scan_staged "$f" '(print|raise [A-Za-z]+)\([^)]*[^"'"'"'[]INTERNAL_SECRET[^]"'"'"']' \
               "secret in print/exception (hard rule #3)"
+  # Also catch f-string interpolation of any *_secret variable.
+  scan_staged "$f" '(logger|logging|log|print|raise [A-Za-z]+)\([^)]*\{[^}]*[Ss]ecret' \
+              "secret variable interpolated into output (hard rule #3)"
   scan_staged "$f" 'INTERNAL_SECRET[[:space:]]*==|==[[:space:]]*[A-Za-z_.]*INTERNAL_SECRET' \
               "use hmac.compare_digest, not == (hard rule #4)"
   scan_staged "$f" '(^|[[:space:]])(pdb\.set_trace|breakpoint)\(' \
@@ -77,6 +89,8 @@ for f in "${py_files[@]+${py_files[@]}}"; do
 done
 
 for f in "${go_files[@]+${go_files[@]}}"; do
+  # InternalAuthSecret in a slog/log call indicates an interpolation; it
+  # cannot appear as a literal in Go strings (no key-name use like Python).
   scan_staged "$f" '(slog|log)\.[A-Za-z]+\([^)]*InternalAuthSecret' \
               "secret may be logged (hard rule #3)"
   scan_staged "$f" 'InternalAuthSecret[[:space:]]*==|==[[:space:]]*[A-Za-z_.]*InternalAuthSecret' \
