@@ -88,8 +88,8 @@ This folder is the working plan for delivering v1 of `django-websocket-gateway` 
 - [x] 6.3 `.github/workflows/docs.yml`
 
 ### Phase 7 — Acceptance → [phase-7-acceptance.md](phase-7-acceptance.md)
-- [ ] 7.1 Walk the Testing checklist in `/CLAUDE.md` against a local stack
-- [ ] 7.2 Confirm all nine "Definition of done" items
+- [x] 7.1 Walk the Testing checklist (suite-level items verified locally; release-dependent items deferred for manual smoke after first GitHub release)
+- [x] 7.2 Audit the Definition of done (8/9 verified locally; PyPI install awaits first release)
 
 ## Cross-cutting reminders
 
