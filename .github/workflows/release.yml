@@ -30,7 +30,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version-file: gateway/go.mod
           cache-dependency-path: gateway/go.sum
 
       - name: Build static binary
